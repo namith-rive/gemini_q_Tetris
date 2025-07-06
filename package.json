@@ -1,0 +1,39 @@
+{
+  "name": "gemini_q_tetris",
+  "version": "1.0.0",
+  "description": "TDD-driven Tetris game by Gemini AI & Amazon Q",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
+    "test:verbose": "NODE_OPTIONS='--experimental-vm-modules' jest --verbose",
+    "test:browser": "playwright test",
+    "test:browser:headed": "playwright test --headed",
+    "test:browser:ui": "playwright test --ui",
+    "test:browser:report": "playwright show-report",
+    "test:all": "npm test && npm run test:browser"
+  },
+  "keywords": [
+    "tetris",
+    "game",
+    "javascript",
+    "tdd",
+    "canvas"
+  ],
+  "author": "Gemini AI & Amazon Q Collaboration",
+  "license": "MIT",
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/js/utils/testSetup.js"
+    ],
+    "transform": {}
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.2",
+    "jest": "^30.0.4",
+    "jest-environment-jsdom": "^30.0.4"
+  }
+}

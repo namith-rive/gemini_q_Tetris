@@ -1,0 +1,214 @@
+/* Tetris Game Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-width: 800px;
+    width: 100%;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+header p {
+    font-size: 1.1em;
+    opacity: 0.8;
+}
+
+.game-area {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.game-board {
+    background: #000;
+    border: 3px solid #333;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+#gameCanvas {
+    display: block;
+    background: #111;
+    border: 2px solid #444;
+}
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 200px;
+}
+
+.score-panel, .level-panel, .lines-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.score-panel h3, .level-panel h3, .lines-panel h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #ffd700;
+}
+
+.score-value, .level-value, .lines-value {
+    font-size: 2em;
+    font-weight: bold;
+    color: #fff;
+}
+
+.controls {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.controls h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #ffd700;
+}
+
+.controls ul {
+    list-style: none;
+}
+
+.controls li {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.game-status {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.status-normal {
+    color: #4CAF50;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.status-paused {
+    color: #FF9800;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.status-gameover {
+    color: #F44336;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.control-btn {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .game-area {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .game-info {
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    #gameCanvas {
+        width: 300px;
+        height: 600px;
+    }
+}
+
+/* アニメーション */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.score-value.updated {
+    animation: pulse 0.3s ease-in-out;
+}
+
+/* ゲームオーバー時のエフェクト */
+.game-over-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.game-over-message {
+    background: rgba(244, 67, 54, 0.9);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+}
