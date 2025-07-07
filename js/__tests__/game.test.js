@@ -1,6 +1,6 @@
 // ゲームロジックのテスト
 import { describe, test, expect, beforeEach } from '@jest/globals';
-import { checkCollision, createEmptyBoard } from '../game.js';
+import { checkCollision, createEmptyBoard, checkFullLines, clearLines, dropLinesDown, calculateScore } from '../game.js';
 import { createTestTetromino } from '../utils/testHelpers.js';
 
 describe('Game Logic', () => {
@@ -143,6 +143,222 @@ describe('Game Logic', () => {
         expect(checkCollision(board, shape, 8, 0, 1, 0)).toBe(true); // 右にオフセット
         expect(checkCollision(board, shape, 0, 18, 0, 1)).toBe(true); // 下にオフセット
         expect(checkCollision(board, shape, 4, 10, 0, 0)).toBe(false); // オフセットなし
+      });
+    });
+  });
+
+  describe('Line Clearing', () => {
+    let board;
+    
+    beforeEach(() => {
+      board = createEmptyBoard();
+    });
+
+    describe('checkFullLines()', () => {
+      test('should return empty array when no full lines exist', () => {
+        // 空のボード
+        expect(checkFullLines(board)).toEqual([]);
+        
+        // 一部だけ埋まったボード
+        board[19][0] = 1;
+        board[19][1] = 1;
+        expect(checkFullLines(board)).toEqual([]);
+      });
+
+      test('should detect single full line', () => {
+        // 最下段を埋める
+        for (let col = 0; col < 10; col++) {
+          board[19][col] = 1;
+        }
+        expect(checkFullLines(board)).toEqual([19]);
+      });
+
+      test('should detect multiple consecutive full lines (Tetris)', () => {
+        // 下から4行を埋める
+        for (let row = 16; row < 20; row++) {
+          for (let col = 0; col < 10; col++) {
+            board[row][col] = 1;
+          }
+        }
+        expect(checkFullLines(board)).toEqual([16, 17, 18, 19]);
+      });
+
+      test('should detect multiple non-consecutive full lines', () => {
+        // 17行目と19行目を埋める
+        for (let col = 0; col < 10; col++) {
+          board[17][col] = 1;
+          board[19][col] = 1;
+        }
+        expect(checkFullLines(board)).toEqual([17, 19]);
+      });
+
+      test('should not detect almost full lines', () => {
+        // 1つだけ空きがある行
+        for (let col = 0; col < 9; col++) {
+          board[19][col] = 1;
+        }
+        expect(checkFullLines(board)).toEqual([]);
+      });
+    });
+
+    describe('clearLines()', () => {
+      test('should clear single line', () => {
+        // 最下段を埋める
+        for (let col = 0; col < 10; col++) {
+          board[19][col] = 1;
+        }
+        
+        clearLines(board, [19]);
+        
+        // 19行目がクリアされている
+        for (let col = 0; col < 10; col++) {
+          expect(board[19][col]).toBe(0);
+        }
+      });
+
+      test('should clear multiple lines', () => {
+        // 16-19行目を埋める
+        for (let row = 16; row < 20; row++) {
+          for (let col = 0; col < 10; col++) {
+            board[row][col] = 1;
+          }
+        }
+        
+        clearLines(board, [16, 17, 18, 19]);
+        
+        // 指定された行がクリアされている
+        for (let row = 16; row < 20; row++) {
+          for (let col = 0; col < 10; col++) {
+            expect(board[row][col]).toBe(0);
+          }
+        }
+      });
+
+      test('should clear non-consecutive lines', () => {
+        // 17行目と19行目を埋める
+        for (let col = 0; col < 10; col++) {
+          board[17][col] = 1;
+          board[19][col] = 1;
+        }
+        
+        clearLines(board, [17, 19]);
+        
+        // 指定された行がクリアされている
+        for (let col = 0; col < 10; col++) {
+          expect(board[17][col]).toBe(0);
+          expect(board[19][col]).toBe(0);
+        }
+      });
+
+      test('should handle empty line indices', () => {
+        // ボードに何かデータを設定
+        board[19][0] = 1;
+        const originalBoard = board.map(row => [...row]);
+        
+        clearLines(board, []);
+        
+        // ボードが変更されていない
+        expect(board).toEqual(originalBoard);
+      });
+    });
+
+    describe('dropLinesDown()', () => {
+      test('should drop lines after single line clear', () => {
+        // テストデータ設定：上部にブロック配置
+        board[10][5] = 1;
+        board[15][3] = 2;
+        
+        // 最下段をクリア済みと仮定
+        dropLinesDown(board, [19]);
+        
+        // ブロックが1行下に移動
+        expect(board[11][5]).toBe(1);
+        expect(board[16][3]).toBe(2);
+        expect(board[10][5]).toBe(0);
+        expect(board[15][3]).toBe(0);
+      });
+
+      test('should drop lines after multiple line clear (Tetris)', () => {
+        // テストデータ設定
+        board[10][5] = 1;
+        board[12][3] = 2;
+        
+        // 下から4行をクリア済みと仮定
+        dropLinesDown(board, [16, 17, 18, 19]);
+        
+        // ブロックが4行下に移動
+        expect(board[14][5]).toBe(1);
+        expect(board[16][3]).toBe(2);
+        expect(board[10][5]).toBe(0);
+        expect(board[12][3]).toBe(0);
+      });
+
+      test('should handle non-consecutive line clears', () => {
+        // テストデータ設定
+        board[16][5] = 1; // 17行目と19行目の間
+        board[18][3] = 2; // 17行目と19行目の間
+        board[10][7] = 3; // 17行目より上
+        
+        // 17行目と19行目をクリア済みと仮定
+        dropLinesDown(board, [17, 19]);
+        
+        // 適切にドロップされている
+        expect(board[18][5]).toBe(1); // 16→18 (1行下)
+        expect(board[19][3]).toBe(2); // 18→19 (1行下)
+        expect(board[12][7]).toBe(3); // 10→12 (2行下)
+      });
+
+      test('should handle empty cleared lines', () => {
+        // テストデータ設定
+        board[10][5] = 1;
+        const originalBoard = board.map(row => [...row]);
+        
+        dropLinesDown(board, []);
+        
+        // ボードが変更されていない
+        expect(board).toEqual(originalBoard);
+      });
+    });
+  });
+
+  describe('Scoring Logic', () => {
+    describe('calculateScore()', () => {
+      test('should score 100 points for a single line clear at level 1', () => {
+        expect(calculateScore(1, 1)).toBe(100);
+      });
+
+      test('should score 300 points for a double line clear at level 1', () => {
+        expect(calculateScore(2, 1)).toBe(300);
+      });
+
+      test('should score 500 points for a triple line clear at level 1', () => {
+        expect(calculateScore(3, 1)).toBe(500);
+      });
+
+      test('should score 800 points for a Tetris (4 lines) at level 1', () => {
+        expect(calculateScore(4, 1)).toBe(800);
+      });
+
+      test('should correctly apply the level multiplier', () => {
+        expect(calculateScore(1, 5)).toBe(500); // 100 * 5
+        expect(calculateScore(2, 3)).toBe(900); // 300 * 3
+        expect(calculateScore(3, 10)).toBe(5000); // 500 * 10
+        expect(calculateScore(4, 2)).toBe(1600); // 800 * 2
+      });
+
+      test('should return 0 for 0 lines cleared', () => {
+        expect(calculateScore(0, 1)).toBe(0);
+        expect(calculateScore(0, 10)).toBe(0);
+      });
+
+      test('should handle invalid inputs gracefully', () => {
+        // 無効なライン数
+        expect(calculateScore(-1, 1)).toBe(0); // 負のライン数
+        expect(calculateScore(5, 1)).toBe(0);  // 5ラインは一度に消せない
+        
+        // 無効なレベル
+        expect(calculateScore(1, 0)).toBe(0);  // レベル0
+        expect(calculateScore(1, -5)).toBe(0); // 負のレベル
       });
     });
   });

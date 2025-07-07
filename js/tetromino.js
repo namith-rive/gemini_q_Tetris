@@ -240,3 +240,30 @@ export function moveTetromino(tetromino, direction) {
 
   return newTetromino;
 }
+
+/**
+ * テトリミノを回転させる（元のオブジェクトは変更しない）
+ * @param {Object} tetromino - 回転させるテトリミノ
+ * @param {string} direction - 回転方向 ('right', 'left')
+ * @returns {Object} 回転後の新しいテトリミノオブジェクト
+ */
+export function rotateTetromino(tetromino, direction = 'right') {
+  // 元のオブジェクトをコピー
+  const newTetromino = { ...tetromino };
+  
+  // 現在の回転状態を取得
+  let newRotation = tetromino.rotation;
+  
+  // 回転方向に応じて新しい回転状態を計算
+  if (direction === 'right') {
+    newRotation = (newRotation + 1) % 4;
+  } else if (direction === 'left') {
+    newRotation = (newRotation + 3) % 4; // 左回転は右回転3回と同じ
+  }
+  
+  // 新しい回転状態を設定
+  newTetromino.rotation = newRotation;
+  newTetromino.shape = TETROMINOS[tetromino.type].shapes[newRotation];
+  
+  return newTetromino;
+}

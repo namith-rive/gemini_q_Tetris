@@ -9,7 +9,7 @@
  * - 依存性注入パターンによる描画システム連携
  */
 
-import { createEmptyBoard, checkCollision } from './game.js';
+import { createEmptyBoard, checkCollision, checkFullLines, clearLines, dropLinesDown, calculateScore } from './game.js';
 import { createTetromino } from './tetromino.js';
 
 /**
@@ -229,7 +229,7 @@ export class Game {
   }
 
   /**
-   * 現在のテトリミノをボードに固定し、新しいテトリミノを生成する
+   * 現在のテトリミノをボードに固定し、ライン消去処理を行う
    */
   fixTetrominoToBoard() {
     if (!this.currentTetromino) {
@@ -258,11 +258,36 @@ export class Game {
     
     console.log(`Tetromino fixed to board: ${type}`);
     
+    // ライン消去処理
+    this.processLineClearing();
+    
     // 現在のテトリミノをクリア
     this.currentTetromino = null;
     
     // 新しいテトリミノを生成
     this.spawnNewTetromino();
+  }
+
+  /**
+   * ライン消去処理を実行する
+   */
+  processLineClearing() {
+    // 完成したラインを検出
+    const fullLines = checkFullLines(this.board);
+    
+    if (fullLines.length > 0) {
+      // ラインをクリア
+      clearLines(this.board, fullLines);
+      
+      // ブロックを下に落とす
+      dropLinesDown(this.board, fullLines);
+      
+      // スコアを計算して加算
+      const points = calculateScore(fullLines.length, this.level);
+      this.addScore(points, fullLines.length);
+      
+      console.log(`Lines cleared: ${fullLines.length}, Points: ${points}`);
+    }
   }
 
   /**

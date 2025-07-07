@@ -53,3 +53,98 @@ export function checkCollision(board, shape, x, y, offsetX = 0, offsetY = 0) {
 
   return false; // 衝突なし
 }
+
+/**
+ * 完成したライン（全てのセルが埋まっている行）を検出する
+ * @param {number[][]} board - ゲームボード
+ * @returns {number[]} 完成したラインのインデックス配列
+ */
+export function checkFullLines(board) {
+  const fullLines = [];
+  
+  for (let row = 0; row < board.length; row++) {
+    let isFull = true;
+    for (let col = 0; col < board[row].length; col++) {
+      if (board[row][col] === 0) {
+        isFull = false;
+        break;
+      }
+    }
+    if (isFull) {
+      fullLines.push(row);
+    }
+  }
+  
+  return fullLines;
+}
+
+/**
+ * 指定されたラインをクリア（全てのセルを0にする）
+ * @param {number[][]} board - ゲームボード
+ * @param {number[]} lineIndices - クリアするラインのインデックス配列
+ */
+export function clearLines(board, lineIndices) {
+  for (const lineIndex of lineIndices) {
+    for (let col = 0; col < board[lineIndex].length; col++) {
+      board[lineIndex][col] = 0;
+    }
+  }
+}
+
+/**
+ * クリアされたライン上のブロックを下に落とす
+ * @param {number[][]} board - ゲームボード
+ * @param {number[]} clearedLineIndices - クリアされたラインのインデックス配列
+ */
+export function dropLinesDown(board, clearedLineIndices) {
+  if (clearedLineIndices.length === 0) {
+    return;
+  }
+  
+  const clearedSet = new Set(clearedLineIndices);
+  let writeRow = board.length - 1; // 書き込み位置
+  
+  // 下から上へチェック
+  for (let readRow = board.length - 1; readRow >= 0; readRow--) {
+    // クリア対象でない行のみコピー
+    if (!clearedSet.has(readRow)) {
+      if (writeRow !== readRow) {
+        for (let col = 0; col < board[readRow].length; col++) {
+          board[writeRow][col] = board[readRow][col];
+        }
+      }
+      writeRow--;
+    }
+  }
+  
+  // 上部を空の行で埋める
+  for (let row = 0; row <= writeRow; row++) {
+    for (let col = 0; col < board[row].length; col++) {
+      board[row][col] = 0;
+    }
+  }
+}
+
+/**
+ * ライン消去数とレベルからスコアを計算する
+ * @param {number} linesCleared - 消去したライン数
+ * @param {number} level - 現在のレベル
+ * @returns {number} 計算されたスコア
+ */
+export function calculateScore(linesCleared, level) {
+  // 無効な入力のチェック
+  if (level <= 0 || linesCleared < 0 || linesCleared > 4) {
+    return 0;
+  }
+  
+  // ライン数に応じたベースコア
+  const baseScores = {
+    0: 0,
+    1: 100,   // シングル
+    2: 300,   // ダブル
+    3: 500,   // トリプル
+    4: 800    // テトリス
+  };
+  
+  return baseScores[linesCleared] * level;
+}

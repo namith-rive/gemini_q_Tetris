@@ -6,6 +6,7 @@
 
 import { Game } from './main.js';
 import { Renderer } from './renderer.js';
+import { rotateTetromino } from './tetromino.js';
 
 /**
  * TetrisApp クラス - ブラウザ環境でのゲーム実行を管理
@@ -187,17 +188,33 @@ class TetrisApp {
     }
 
     /**
-     * 右回転（未実装 - フェーズ2で実装予定）
+     * 右回転
      */
     rotateRight() {
-        console.log('Right rotation - Coming in Phase 2');
+        if (this.game.currentTetromino && !this.game.paused) {
+            const rotatedTetromino = rotateTetromino(this.game.currentTetromino, 'right');
+            
+            // 衝突判定
+            if (!this.game.checkCollision(this.game.board, rotatedTetromino.shape, rotatedTetromino.x, rotatedTetromino.y)) {
+                this.game.currentTetromino.rotation = rotatedTetromino.rotation;
+                this.game.currentTetromino.shape = rotatedTetromino.shape;
+            }
+        }
     }
 
     /**
-     * 左回転（未実装 - フェーズ2で実装予定）
+     * 左回転
      */
     rotateLeft() {
-        console.log('Left rotation - Coming in Phase 2');
+        if (this.game.currentTetromino && !this.game.paused) {
+            const rotatedTetromino = rotateTetromino(this.game.currentTetromino, 'left');
+            
+            // 衝突判定
+            if (!this.game.checkCollision(this.game.board, rotatedTetromino.shape, rotatedTetromino.x, rotatedTetromino.y)) {
+                this.game.currentTetromino.rotation = rotatedTetromino.rotation;
+                this.game.currentTetromino.shape = rotatedTetromino.shape;
+            }
+        }
     }
 
     /**
